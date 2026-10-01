@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Typecheck & build (frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  database:
+    name: Migrations, RLS coverage gate, pgTAP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # `supabase start` provisions local Postgres + Auth + Storage + Realtime via Docker
+      # (already available on GitHub's runners, unlike a sandboxed dev session) — this is
+      # the same stack migrations will run against in production, not a stand-in.
+      - name: Start local Supabase stack
+        run: supabase start
+
+      # Applies every migration in supabase/migrations/ from scratch against a clean DB —
+      # the only way schema/RLS policy changes ever reach a database, local or production,
+      # so if this step fails, the migration is broken, full stop.
+      - name: Apply migrations (supabase db reset)
+        run: supabase db reset
+
+      # 02-DATA-MODEL-AND-SECURITY.md §8: every table in `public` must have RLS enabled.
+      # This is a hard gate, not a lint suggestion — a table can never reach production
+      # without it, and this is what actually enforces that, not a reviewer remembering to look.
+      - name: RLS-enabled-on-every-table gate
+        run: |
+          UNPROTECTED=$(psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -tA -c "
+            select relname from pg_class c
+            join pg_namespace n on n.oid = c.relnamespace
+            where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity;
+          ")
+          if [ -n "$UNPROTECTED" ]; then
+            echo "::error::Tables missing RLS: $UNPROTECTED"
+            exit 1
+          fi
+          echo "All public tables have RLS enabled."
+
+      # pgTAP invariant tests (the Dirty-Dozen successor — 02-DATA-MODEL-AND-SECURITY.md §9).
+      # Currently a placeholder: no .sql test files exist yet (first ones land alongside the
+      # payments/affiliate migrations). This step is wired now so adding tests later needs no
+      # CI changes, and so an empty test suite is visible here rather than silently assumed.
+      - name: pgTAP tests
+        run: |
+          if ls supabase/tests/pgtap/*.sql >/dev/null 2>&1; then
+            supabase test db
+          else
+            echo "No pgTAP test files yet in supabase/tests/pgtap/ — skipping (not a pass, a known gap)."
+          fi
+
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop
