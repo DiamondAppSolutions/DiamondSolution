@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { validatePassword } from "@/lib/passwordPolicy";
+import { DiamondLogo } from "@/components/DiamondLogo";
 
 interface Department {
   id: string;
@@ -89,134 +90,152 @@ export default function Register() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md space-y-4 rounded-xl bg-white p-8 shadow-sm"
-      >
-        <h1 className="text-xl font-semibold text-slate-900">Create account</h1>
+    <div className="diamond-mesh flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="mb-8 flex justify-center">
+          <DiamondLogo size={48} />
+        </div>
 
-        {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        )}
-        {info && (
-          <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">{info}</p>
-        )}
+        <form onSubmit={handleSubmit} className="card-luxury space-y-4 p-8">
+          <h1 className="font-heading text-xl font-bold text-text-1">
+            Create account
+          </h1>
 
-        <Field label="Full name">
-          <input
-            required
-            value={form.displayName}
-            onChange={(e) => update("displayName", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
+          {error && (
+            <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              {error}
+            </p>
+          )}
+          {info && (
+            <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+              {info}
+            </p>
+          )}
 
-        <Field label="Username">
-          <input
-            required
-            value={form.username}
-            onChange={(e) => update("username", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
+          <Field label="Full name">
+            <input
+              required
+              value={form.displayName}
+              onChange={(e) => update("displayName", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
 
-        <Field label="Institution">
-          <input
-            value={form.institutionName}
-            onChange={(e) => update("institutionName", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
+          <Field label="Username">
+            <input
+              required
+              value={form.username}
+              onChange={(e) => update("username", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
 
-        <Field label="University">
-          <input
-            value={form.university}
-            onChange={(e) => update("university", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
+          <Field label="Institution">
+            <input
+              value={form.institutionName}
+              onChange={(e) => update("institutionName", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
 
-        <Field label="Department">
-          <select
-            value={form.departmentId}
-            onChange={(e) => update("departmentId", e.target.value)}
-            className={inputClass}
+          <Field label="University">
+            <input
+              value={form.university}
+              onChange={(e) => update("university", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Department">
+            <select
+              value={form.departmentId}
+              onChange={(e) => update("departmentId", e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Select a department</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="WhatsApp number">
+            <input
+              value={form.whatsapp}
+              onChange={(e) => update("whatsapp", e.target.value)}
+              placeholder="+2348012345678"
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Email">
+            <input
+              type="email"
+              required
+              value={form.email}
+              onChange={(e) => update("email", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Password">
+            <input
+              type="password"
+              required
+              value={form.password}
+              onChange={(e) => update("password", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Confirm password">
+            <input
+              type="password"
+              required
+              value={form.confirmPassword}
+              onChange={(e) => update("confirmPassword", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full"
           >
-            <option value="">Select a department</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </Field>
+            {loading ? "Creating account…" : "Create account"}
+          </button>
 
-        <Field label="WhatsApp number">
-          <input
-            value={form.whatsapp}
-            onChange={(e) => update("whatsapp", e.target.value)}
-            placeholder="+2348012345678"
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Email">
-          <input
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => update("email", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Password">
-          <input
-            type="password"
-            required
-            value={form.password}
-            onChange={(e) => update("password", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Confirm password">
-          <input
-            type="password"
-            required
-            value={form.confirmPassword}
-            onChange={(e) => update("confirmPassword", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-        >
-          {loading ? "Creating account…" : "Create account"}
-        </button>
-
-        <p className="text-center text-sm text-slate-500">
-          Already have an account?{" "}
-          <Link to="/login" className="font-medium text-blue-600 hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </form>
+          <p className="text-center text-sm text-text-3">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-royal hover:underline"
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
 
 const inputClass =
-  "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none";
+  "mt-1 w-full rounded-xl border border-canvas-border bg-white px-3 py-2.5 text-sm text-text-1 transition-colors focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/15";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700">{label}</label>
+      <label className="block text-sm font-medium text-text-2">{label}</label>
       {children}
     </div>
   );

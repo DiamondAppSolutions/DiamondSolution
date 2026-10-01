@@ -1,19 +1,139 @@
+/* Public Sans (body) + Plus Jakarta Sans (headings) — the same heading face as the previous
+   site (its "font-serif" token was actually this, not a true serif). Body swaps Inter for
+   Public Sans: comparable neutral/legible workhorse, without reproducing the single most
+   common "AI-generated site" font default. Self-hosted via @fontsource (no Google Fonts CDN
+   call) — one less third-party request, nothing that can be slow or blocked. */
+@import "@fontsource/public-sans/400.css";
+@import "@fontsource/public-sans/500.css";
+@import "@fontsource/public-sans/600.css";
+@import "@fontsource/public-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
 @import "tailwindcss";
+
+@theme {
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #f8f9fb;
+  --color-canvas-card: #ffffff;
+  --color-canvas-soft: #eef2fa;
+  --color-canvas-border: #dde5f5;
+
+  --color-navy: #0b1e3d;
+  --color-navy-dark: #07152b;
+  --color-navy-light: #152e59;
+  --color-navy-border: #1e3b6e;
+
+  --color-royal: #1b3fa0;
+  --color-royal-dark: #143282;
+  --color-royal-light: #2552cc;
+  --color-royal-soft: #eef3ff;
+  --color-royal-border: #d4e0fc;
+
+  --color-gold: #d4af37;
+  --color-gold-dark: #996515;
+  --color-gold-light: #f3c644;
+  --color-gold-pale: #fef9e7;
+  --color-gold-border: #f5e5a4;
+
+  --color-text-1: #0b1e3d;
+  --color-text-2: #334155;
+  --color-text-3: #64748b;
+}
 
 :root {
   color-scheme: light;
 }
 
-body {
-  margin: 0;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
-  background-color: #f8f9fb;
+@layer base {
+  html,
+  body {
+    @apply bg-canvas font-sans text-text-1 antialiased;
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading tracking-tight;
+  }
+
+  ::selection {
+    background-color: rgb(27 63 160 / 0.15);
+    color: #1b3fa0;
+  }
+
+  /* Keep browser autofill from overriding the brand's input styling. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:autofill {
+    -webkit-box-shadow: 0 0 0 1000px #eef3ff inset !important;
+    -webkit-text-fill-color: #0b1e3d !important;
+    caret-color: #1b3fa0 !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  /* Deliberately a flat two-stop blue gradient, not purple/indigo, and never paired with a
+     floating glow/orb — the old site's gradient panels had those, and they're dropped here. */
+  .diamond-gradient {
+    background: linear-gradient(135deg, #0b1e3d 0%, #1b3fa0 70%);
+  }
+
+  .diamond-mesh {
+    background-color: #f8f9fb;
+    background-image:
+      radial-gradient(at 0% 0%, rgb(27 63 160 / 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgb(11 30 61 / 0.05) 0px, transparent 50%);
+  }
+
+  .card-luxury {
+    @apply overflow-hidden rounded-3xl border border-canvas-border bg-white shadow-[0_4px_20px_rgba(11,30,61,0.03)] transition-all duration-300 hover:border-royal/40 hover:shadow-[0_12px_28px_rgba(27,63,160,0.08)];
+  }
+
+  .btn-primary {
+    @apply flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-royal px-5 py-2.5 font-semibold text-white shadow-md shadow-royal/20 transition-all hover:bg-royal-dark hover:shadow-lg hover:shadow-royal/30 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-royal-border bg-royal-soft px-5 py-2.5 font-semibold text-royal transition-all hover:bg-[#e0eaff] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-outline {
+    @apply flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-canvas-border bg-transparent px-5 py-2.5 font-semibold text-slate-700 transition-all hover:border-royal/40 hover:bg-royal-soft hover:text-royal active:scale-[0.98];
+  }
+
+  .btn-gold {
+    @apply flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-gold px-5 py-2.5 font-bold text-navy shadow-md shadow-gold/25 transition-all hover:bg-gold-dark hover:shadow-lg active:scale-[0.98] disabled:opacity-50;
+  }
+
+  .badge-gold {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-gold-border bg-gold-pale px-2.5 py-1 text-xs font-bold text-gold-dark shadow-xs;
+  }
+
+  .badge-royal {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-royal-border bg-royal-soft px-2.5 py-1 text-xs font-bold text-royal shadow-xs;
+  }
+
+  .badge-navy {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-navy px-2.5 py-1 text-xs font-bold text-white shadow-xs;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-slate-200/80;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }

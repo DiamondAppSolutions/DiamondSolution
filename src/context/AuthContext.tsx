@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
@@ -59,20 +65,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (active) setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (!active) return;
-      setSession(newSession);
-      if (newSession?.user) {
-        await loadProfileAndRoles(newSession.user.id);
-        // Phase 5 (05-BACKEND.md §3) will call the `register-session` Edge Function here on
-        // event === "SIGNED_IN" to enforce the concurrent-session cap. Not wired yet —
-        // login_sessions/app_settings don't exist until that phase's migration lands.
-        void event;
-      } else {
-        setProfile(null);
-        setRoles([]);
-      }
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        if (!active) return;
+        setSession(newSession);
+        if (newSession?.user) {
+          await loadProfileAndRoles(newSession.user.id);
+          // Phase 5 (05-BACKEND.md §3) will call the `register-session` Edge Function here on
+          // event === "SIGNED_IN" to enforce the concurrent-session cap. Not wired yet —
+          // login_sessions/app_settings don't exist until that phase's migration lands.
+          void event;
+        } else {
+          setProfile(null);
+          setRoles([]);
+        }
+      },
+    );
 
     return () => {
       active = false;

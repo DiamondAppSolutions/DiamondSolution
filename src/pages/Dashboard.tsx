@@ -1,26 +1,37 @@
 import { useAuth } from "@/context/AuthContext";
+import { DiamondLogo } from "@/components/DiamondLogo";
 
 export default function Dashboard() {
   const { user, profile, roles, signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="mx-auto max-w-2xl space-y-4 rounded-xl bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">
-          Welcome, {profile?.display_name ?? user?.email}
-        </h1>
-        <p className="text-sm text-slate-500">Signed in as {user?.email}</p>
-        <p className="text-sm text-slate-500">Roles: {roles.length ? roles.join(", ") : "student (default)"}</p>
-        <p className="text-sm text-slate-400">
-          Placeholder — the real dashboard (stats, study resume, leaderboard widget) is built
-          in Phase 2 per 04-ROADMAP.md.
-        </p>
-        <button
-          onClick={() => void signOut()}
-          className="rounded-md bg-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300"
-        >
-          Sign out
-        </button>
+    <div className="diamond-mesh min-h-screen p-6 sm:p-10">
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="flex items-center justify-between">
+          <DiamondLogo layout="horizontal" size={40} />
+          <button onClick={() => void signOut()} className="btn-outline">
+            Sign out
+          </button>
+        </div>
+
+        <div className="card-luxury p-6 sm:p-8">
+          <h1 className="font-heading text-xl font-bold text-text-1">
+            Welcome, {profile?.display_name ?? user?.email}
+          </h1>
+          <p className="mt-1 text-sm text-text-3">Signed in as {user?.email}</p>
+
+          <div className="mt-4">
+            <span className="badge-royal">
+              {roles.length ? roles.join(", ") : "student"}
+            </span>
+          </div>
+
+          <p className="mt-6 text-sm text-text-3">
+            Placeholder — the real dashboard (stats, study resume, leaderboard
+            widget) is built in Phase 2 per{" "}
+            <code className="text-xs">docs/design/04-ROADMAP.md</code>.
+          </p>
+        </div>
       </div>
     </div>
   );
