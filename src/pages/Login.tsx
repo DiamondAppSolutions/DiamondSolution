@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { DiamondLogo } from "@/components/DiamondLogo";
 import { AuthTabs } from "@/components/AuthTabs";
@@ -77,6 +77,16 @@ export default function Login() {
         </div>
 
         <p className="mt-6 text-center text-xs text-text-3">
+          Staff?{" "}
+          <Link
+            to="/admin/login"
+            className="font-semibold text-royal hover:underline"
+          >
+            Admin sign in
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center text-xs text-text-3">
           Diamond Solution is an independent study platform and is not
           affiliated with, endorsed by, or sponsored by any professional
           licensing or certification board.

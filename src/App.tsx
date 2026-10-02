@@ -17,6 +17,7 @@ import AdminQuestions from "@/pages/admin/AdminQuestions";
 import AdminPayments from "@/pages/admin/AdminPayments";
 import AdminWithdrawals from "@/pages/admin/AdminWithdrawals";
 import AdminAuditLog from "@/pages/admin/AdminAuditLog";
+import AdminLogin from "@/pages/admin/AdminLogin";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />

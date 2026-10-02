@@ -20,7 +20,7 @@ export function ProtectedRoute() {
 }
 
 export function AdminRoute() {
-  const { isAdmin, isModerator, loading } = useAuth();
+  const { user, isAdmin, isModerator, loading } = useAuth();
 
   if (loading) {
     return (
@@ -30,6 +30,13 @@ export function AdminRoute() {
     );
   }
 
+  // Not signed in at all → the admin sign-in page, not the student one.
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  // A real, signed-in account, just not staff → their own dashboard, not back to a login
+  // page they'd only fail again.
   if (!isAdmin && !isModerator) {
     return <Navigate to="/dashboard" replace />;
   }
