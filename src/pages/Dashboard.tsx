@@ -51,6 +51,23 @@ function greeting() {
   return "Good evening";
 }
 
+// A raw email address is never a presentable greeting name — fall back to the username, or
+// a title-cased version of the email's local part, before giving up to a generic "Scholar".
+// display_name should already be set for everyone who signed up through Register.tsx (it's a
+// required field there), so landing here at all means an older or externally-created account.
+function greetingName(
+  profile: { display_name: string | null; username: string | null } | null,
+  email: string | undefined,
+) {
+  if (profile?.display_name) return profile.display_name;
+  if (profile?.username) return profile.username;
+  if (email) {
+    const local = email.split("@")[0].replace(/[._-]+/g, " ");
+    return local.replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  return "Scholar";
+}
+
 export default function Dashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -224,7 +241,7 @@ export default function Dashboard() {
         </div>
         <p className="mt-3 text-xs text-white/70">{greeting()},</p>
         <p className="font-heading text-xl font-bold">
-          {profile?.display_name ?? user?.email}
+          {greetingName(profile, user?.email)}
         </p>
         <div className="mt-4 grid grid-cols-3 gap-2">
           <HeroStat label="Points" value={points} />
