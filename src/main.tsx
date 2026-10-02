@@ -37,17 +37,21 @@ if (missing.length > 0) {
           padding: 24,
         }}
       >
-        <h1 style={{ color: "#be123c", fontSize: 18, fontWeight: 700, margin: 0 }}>
+        <h1
+          style={{ color: "#be123c", fontSize: 18, fontWeight: 700, margin: 0 }}
+        >
           Configuration missing
         </h1>
         <p style={{ color: "#334155", fontSize: 14, marginTop: 12 }}>
           This deployment is missing required environment variable
-          {missing.length > 1 ? "s" : ""}: <strong>{missing.join(", ")}</strong>.
+          {missing.length > 1 ? "s" : ""}: <strong>{missing.join(", ")}</strong>
+          .
         </p>
         <p style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>
-          Set {missing.length > 1 ? "them" : "it"} in your hosting provider's environment
-          variables (Netlify: Site configuration → Environment variables), then trigger a new
-          deploy — Vite bakes these in at build time, so adding the variable alone isn't enough.
+          Set {missing.length > 1 ? "them" : "it"} in your hosting provider's
+          environment variables (Netlify: Site configuration → Environment
+          variables), then trigger a new deploy — Vite bakes these in at build
+          time, so adding the variable alone isn't enough.
         </p>
       </div>
     </div>,
