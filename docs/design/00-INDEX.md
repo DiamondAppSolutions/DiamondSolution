@@ -25,6 +25,12 @@ approve before one is created.
    earlier draft of this package assumed Supabase's built-in session controls would cover the
    device-session cap; checked against Supabase's current docs, those are Pro-plan-only and
    only support a strict 1-session cap, so §3 of this file designs it ourselves instead).
+6. **`06-SUPABASE-DEPLOYMENT-CHECKLIST.md`** — the repo now exists and Phases 1–4 (notifications)
+   are built, but nothing has reached a live Supabase project yet since this has all been built
+   from a sandbox that can't reach `api.supabase.com`. This is the exact, ordered list of what
+   to run from a real machine: link + push the schema, set secrets, deploy Edge Functions,
+   register the Paystack webhook, configure Auth redirect URLs, set Netlify env vars, bootstrap
+   the first admin, and smoke-test a real payment before going live.
 
 ## Open decisions for you specifically
 
