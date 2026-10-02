@@ -16,7 +16,6 @@ create table profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
   username text unique,
-  institution_name text,
   university text,
   department_id uuid references departments(id),
   phone text,

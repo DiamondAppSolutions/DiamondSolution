@@ -12,7 +12,6 @@ export interface Profile {
   user_id: string;
   display_name: string | null;
   username: string | null;
-  institution_name: string | null;
   university: string | null;
   department_id: string | null;
   phone: string | null;

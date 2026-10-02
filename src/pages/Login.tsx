@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { DiamondLogo } from "@/components/DiamondLogo";
+import { AuthTabs } from "@/components/AuthTabs";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -35,55 +36,51 @@ export default function Login() {
           <DiamondLogo size={56} showTagline />
         </div>
 
-        <form onSubmit={handleSubmit} className="card-luxury space-y-4 p-8">
-          <h1 className="font-heading text-xl font-bold text-text-1">
-            Sign in
-          </h1>
+        <div className="card-luxury p-8">
+          <AuthTabs active="signin" />
 
-          {error && (
-            <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {error}
-            </p>
-          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {error}
+              </p>
+            )}
 
-          <Field label="Email">
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+            <Field label="Email">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
-          <Field label="Password">
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+            <Field label="Password">
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full"
-          >
-            {loading ? "Signing in…" : "Sign in"}
-          </button>
-
-          <p className="text-center text-sm text-text-3">
-            No account?{" "}
-            <Link
-              to="/register"
-              className="font-semibold text-royal hover:underline"
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full"
             >
-              Create one
-            </Link>
-          </p>
-        </form>
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-text-3">
+          Diamond Solution is an independent study platform and is not
+          affiliated with, endorsed by, or sponsored by any professional
+          licensing or certification board.
+        </p>
       </div>
     </div>
   );

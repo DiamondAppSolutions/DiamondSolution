@@ -128,14 +128,13 @@ declare
   v_referrer_id uuid;
 begin
   insert into public.profiles (
-    user_id, display_name, username, institution_name, university,
+    user_id, display_name, username, university,
     department_id, phone, whatsapp, language
   )
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1)),
     coalesce(new.raw_user_meta_data ->> 'username', split_part(new.email, '@', 1)),
-    new.raw_user_meta_data ->> 'institution_name',
     new.raw_user_meta_data ->> 'university',
     nullif(new.raw_user_meta_data ->> 'department_id', '')::uuid,
     new.raw_user_meta_data ->> 'phone',

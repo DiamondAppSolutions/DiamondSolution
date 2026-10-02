@@ -50,7 +50,8 @@ create table profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
   username text unique,
-  institution_name text,
+  -- Free-text institution/university name — one field, matching how a student actually
+  -- identifies their school ("University of Ibadan"), not split into two.
   university text,
   department_id uuid references departments(id),
   phone text,
@@ -161,14 +162,13 @@ set search_path = public
 as $$
 begin
   insert into public.profiles (
-    user_id, display_name, username, institution_name, university,
+    user_id, display_name, username, university,
     department_id, phone, whatsapp, language
   )
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1)),
     coalesce(new.raw_user_meta_data ->> 'username', split_part(new.email, '@', 1)),
-    new.raw_user_meta_data ->> 'institution_name',
     new.raw_user_meta_data ->> 'university',
     nullif(new.raw_user_meta_data ->> 'department_id', '')::uuid,
     new.raw_user_meta_data ->> 'phone',

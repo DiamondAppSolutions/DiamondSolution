@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { validatePassword } from "@/lib/passwordPolicy";
 import { DiamondLogo } from "@/components/DiamondLogo";
+import { AuthTabs } from "@/components/AuthTabs";
 
 interface Department {
   id: string;
@@ -16,7 +17,6 @@ export default function Register() {
   const [form, setForm] = useState({
     displayName: "",
     username: "",
-    institutionName: "",
     university: "",
     departmentId: "",
     whatsapp: "",
@@ -69,11 +69,10 @@ export default function Register() {
         data: {
           display_name: form.displayName,
           username: form.username.toLowerCase().replace(/\s+/g, ""),
-          institution_name: form.institutionName,
           university: form.university,
           department_id: form.departmentId || null,
-          whatsapp: form.whatsapp,
-          phone: form.whatsapp,
+          whatsapp: form.whatsapp ? `+234${form.whatsapp}` : "",
+          phone: form.whatsapp ? `+234${form.whatsapp}` : "",
           language: "en",
           referral_code: form.referralCode || null,
         },
@@ -97,131 +96,127 @@ export default function Register() {
     <div className="diamond-mesh flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
-          <DiamondLogo size={48} />
+          <DiamondLogo size={48} showTagline />
         </div>
 
-        <form onSubmit={handleSubmit} className="card-luxury space-y-4 p-8">
-          <h1 className="font-heading text-xl font-bold text-text-1">
-            Create account
-          </h1>
+        <div className="card-luxury p-8">
+          <AuthTabs active="register" />
 
-          {error && (
-            <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {error}
-            </p>
-          )}
-          {info && (
-            <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-              {info}
-            </p>
-          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {error}
+              </p>
+            )}
+            {info && (
+              <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                {info}
+              </p>
+            )}
 
-          <Field label="Full name">
-            <input
-              required
-              value={form.displayName}
-              onChange={(e) => update("displayName", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+            <Field label="Full name">
+              <input
+                required
+                value={form.displayName}
+                onChange={(e) => update("displayName", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
-          <Field label="Username">
-            <input
-              required
-              value={form.username}
-              onChange={(e) => update("username", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+            <Field label="Username">
+              <input
+                required
+                value={form.username}
+                onChange={(e) => update("username", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
-          <Field label="Institution">
-            <input
-              value={form.institutionName}
-              onChange={(e) => update("institutionName", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+            <Field label="Institution / University (full name)">
+              <input
+                placeholder="e.g. University of Ibadan"
+                value={form.university}
+                onChange={(e) => update("university", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
-          <Field label="University">
-            <input
-              value={form.university}
-              onChange={(e) => update("university", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
+            <Field label="Department">
+              <select
+                value={form.departmentId}
+                onChange={(e) => update("departmentId", e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Select a department</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
 
-          <Field label="Department">
-            <select
-              value={form.departmentId}
-              onChange={(e) => update("departmentId", e.target.value)}
-              className={inputClass}
+            <Field label="WhatsApp number">
+              <div className="mt-1 flex gap-2">
+                <span className="flex items-center gap-1 rounded-xl border border-canvas-border bg-canvas-soft px-3 text-sm text-text-2">
+                  🇳🇬 +234
+                </span>
+                <input
+                  value={form.whatsapp}
+                  onChange={(e) =>
+                    update("whatsapp", e.target.value.replace(/\D/g, ""))
+                  }
+                  placeholder="8011223344"
+                  className={`${inputClass} mt-0 flex-1`}
+                />
+              </div>
+            </Field>
+
+            <Field label="Email">
+              <input
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) => update("email", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+
+            <Field label="Password">
+              <input
+                type="password"
+                required
+                value={form.password}
+                onChange={(e) => update("password", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+
+            <Field label="Confirm password">
+              <input
+                type="password"
+                required
+                value={form.confirmPassword}
+                onChange={(e) => update("confirmPassword", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full"
             >
-              <option value="">Select a department</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+              {loading ? "Creating account…" : "Create account"}
+            </button>
+          </form>
+        </div>
 
-          <Field label="WhatsApp number">
-            <input
-              value={form.whatsapp}
-              onChange={(e) => update("whatsapp", e.target.value)}
-              placeholder="+2348012345678"
-              className={inputClass}
-            />
-          </Field>
-
-          <Field label="Email">
-            <input
-              type="email"
-              required
-              value={form.email}
-              onChange={(e) => update("email", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-
-          <Field label="Password">
-            <input
-              type="password"
-              required
-              value={form.password}
-              onChange={(e) => update("password", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-
-          <Field label="Confirm password">
-            <input
-              type="password"
-              required
-              value={form.confirmPassword}
-              onChange={(e) => update("confirmPassword", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full"
-          >
-            {loading ? "Creating account…" : "Create account"}
-          </button>
-
-          <p className="text-center text-sm text-text-3">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-semibold text-royal hover:underline"
-            >
-              Sign in
-            </Link>
-          </p>
-        </form>
+        <p className="mt-6 text-center text-xs text-text-3">
+          Diamond Solution is an independent study platform and is not
+          affiliated with, endorsed by, or sponsored by any professional
+          licensing or certification board.
+        </p>
       </div>
     </div>
   );
