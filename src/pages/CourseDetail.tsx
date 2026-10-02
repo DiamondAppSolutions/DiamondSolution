@@ -151,11 +151,11 @@ export default function CourseDetail() {
             {meta?.questionCount} question(s) available
           </p>
           <button
-            disabled
-            title="Practice sessions launch in the next build phase"
-            className="btn-gold mt-4 w-full opacity-70"
+            onClick={() => navigate(`/courses/${course.id}/study`)}
+            disabled={!meta?.questionCount}
+            className="btn-gold mt-4 w-full disabled:opacity-50"
           >
-            Start studying — coming soon
+            {meta?.questionCount ? "Start studying" : "No questions yet"}
           </button>
         </div>
       )}

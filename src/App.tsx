@@ -7,6 +7,9 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import CourseList from "@/pages/CourseList";
 import CourseDetail from "@/pages/CourseDetail";
+import StudyPage from "@/pages/StudyPage";
+import ActivityLog from "@/pages/ActivityLog";
+import Leaderboard from "@/pages/Leaderboard";
 import AdminDepartments from "@/pages/admin/AdminDepartments";
 import AdminCourses from "@/pages/admin/AdminCourses";
 import AdminQuestions from "@/pages/admin/AdminQuestions";
@@ -23,6 +26,9 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/courses" element={<CourseList />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/courses/:id/study" element={<StudyPage />} />
+          <Route path="/activity-log" element={<ActivityLog />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
         </Route>
 
         <Route element={<AdminRoute />}>
