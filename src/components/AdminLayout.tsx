@@ -4,6 +4,7 @@ import { DiamondLogo } from "@/components/DiamondLogo";
 const TABS = [
   { to: "/admin/departments", label: "Departments" },
   { to: "/admin/courses", label: "Courses" },
+  { to: "/admin/payments", label: "Transactions" },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

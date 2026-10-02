@@ -13,6 +13,7 @@ import Leaderboard from "@/pages/Leaderboard";
 import AdminDepartments from "@/pages/admin/AdminDepartments";
 import AdminCourses from "@/pages/admin/AdminCourses";
 import AdminQuestions from "@/pages/admin/AdminQuestions";
+import AdminPayments from "@/pages/admin/AdminPayments";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
             path="/admin/courses/:courseId/questions"
             element={<AdminQuestions />}
           />
+          <Route path="/admin/payments" element={<AdminPayments />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

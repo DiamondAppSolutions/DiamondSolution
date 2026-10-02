@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { validatePassword } from "@/lib/passwordPolicy";
 import { DiamondLogo } from "@/components/DiamondLogo";
@@ -11,6 +11,7 @@ interface Department {
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [form, setForm] = useState({
     displayName: "",
@@ -22,6 +23,8 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
+    referralCode:
+      searchParams.get("ref") ?? sessionStorage.getItem("referralCode") ?? "",
   });
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -72,6 +75,7 @@ export default function Register() {
           whatsapp: form.whatsapp,
           phone: form.whatsapp,
           language: "en",
+          referral_code: form.referralCode || null,
         },
       },
     });
