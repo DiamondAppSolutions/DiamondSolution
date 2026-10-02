@@ -5,6 +5,7 @@ const TABS = [
   { to: "/admin/departments", label: "Departments" },
   { to: "/admin/courses", label: "Courses" },
   { to: "/admin/payments", label: "Transactions" },
+  { to: "/admin/withdrawals", label: "Withdrawals" },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

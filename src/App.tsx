@@ -15,6 +15,7 @@ import AdminDepartments from "@/pages/admin/AdminDepartments";
 import AdminCourses from "@/pages/admin/AdminCourses";
 import AdminQuestions from "@/pages/admin/AdminQuestions";
 import AdminPayments from "@/pages/admin/AdminPayments";
+import AdminWithdrawals from "@/pages/admin/AdminWithdrawals";
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
             element={<AdminQuestions />}
           />
           <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
