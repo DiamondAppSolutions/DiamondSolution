@@ -14,6 +14,7 @@ import {
   createTransferRecipient,
   initiateTransfer,
 } from "../_shared/paystack.ts";
+import { notify } from "../_shared/notify.ts";
 
 Deno.serve(async (req) => {
   const preflight = handleOptions(req);
@@ -65,6 +66,13 @@ Deno.serve(async (req) => {
           processed_by: admin.id,
         })
         .eq("id", withdrawal_id);
+      await notify({
+        db,
+        userId: withdrawal.user_id,
+        type: "withdrawal_processed",
+        title: "Withdrawal rejected",
+        body: `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} was rejected${reason ? `: ${reason}` : "."}`,
+      });
       return jsonResponse({ success: true, status: "failed" });
     }
 
@@ -106,6 +114,13 @@ Deno.serve(async (req) => {
           processed_by: admin.id,
         })
         .eq("id", withdrawal_id);
+      await notify({
+        db,
+        userId: withdrawal.user_id,
+        type: "withdrawal_processed",
+        title: "Withdrawal failed",
+        body: `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} failed: ${recipient.message}`,
+      });
       throw new HttpError(
         502,
         `Paystack recipient creation failed: ${recipient.message}`,
@@ -129,6 +144,16 @@ Deno.serve(async (req) => {
         processed_by: admin.id,
       })
       .eq("id", withdrawal_id);
+
+    await notify({
+      db,
+      userId: withdrawal.user_id,
+      type: "withdrawal_processed",
+      title: paid ? "Withdrawal paid" : "Withdrawal failed",
+      body: paid
+        ? `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} was paid out.`
+        : `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} failed: ${transfer.message}`,
+    });
 
     if (!paid)
       throw new HttpError(502, `Paystack transfer failed: ${transfer.message}`);

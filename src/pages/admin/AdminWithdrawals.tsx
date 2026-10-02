@@ -108,15 +108,10 @@ export default function AdminWithdrawals() {
     if (!reference) return;
     setBusyId(id);
     setError(null);
-    const { error: updateError } = await supabase
-      .from("withdrawals")
-      .update({
-        status: "success",
-        provider_reference: reference,
-        provider_response: { manual: true },
-        processed_at: new Date().toISOString(),
-      })
-      .eq("id", id);
+    const { error: updateError } = await supabase.rpc(
+      "mark_withdrawal_paid_manually",
+      { p_withdrawal_id: id, p_reference: reference },
+    );
     setBusyId(null);
     if (updateError) setError(updateError.message);
     void load();

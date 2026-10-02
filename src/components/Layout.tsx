@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, Home, BookOpen, Shield, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { NotificationBell } from "@/components/NotificationBell";
 
 interface LayoutProps {
   title: string;
@@ -32,13 +33,16 @@ export function Layout({ title, onBack, children }: LayoutProps) {
           <h1 className="font-heading text-lg font-bold text-text-1">
             {title}
           </h1>
-          <button
-            onClick={() => void signOut()}
-            className="ml-auto rounded-full p-1.5 text-text-3 hover:bg-canvas-soft"
-            title="Sign out"
-          >
-            <LogOut size={18} />
-          </button>
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationBell />
+            <button
+              onClick={() => void signOut()}
+              className="rounded-full p-1.5 text-text-3 hover:bg-canvas-soft"
+              title="Sign out"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
       </header>
 

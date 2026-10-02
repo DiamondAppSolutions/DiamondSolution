@@ -12,6 +12,7 @@
 // transactions ledger rather than inform it.
 import { serviceClient, HttpError } from "./supabaseClients.ts";
 import type { PaystackVerifyResult } from "./paystack.ts";
+import { notify } from "./notify.ts";
 
 interface ProcessArgs {
   reference: string;
@@ -64,6 +65,13 @@ export async function processDepartmentAccessPayment({
     } else {
       await db.from("payments").insert(row);
     }
+    await notify({
+      db,
+      userId,
+      type: "payment_failed",
+      title: "Payment failed",
+      body: reason,
+    });
     throw new HttpError(402, reason);
   }
 
@@ -148,6 +156,22 @@ export async function processDepartmentAccessPayment({
 
   if (grantError) throw new HttpError(500, grantError.message);
 
+  const { data: department } = await db
+    .from("departments")
+    .select("name")
+    .eq("id", departmentId)
+    .maybeSingle();
+
+  await notify({
+    db,
+    userId,
+    type: "payment_success",
+    title: "Payment received",
+    body: department
+      ? `Your payment for ${department.name} was confirmed — you now have access.`
+      : "Your payment was confirmed — you now have access.",
+  });
+
   await creditReferralCommission({
     db,
     paymentId: paymentRow.data.id,
@@ -198,7 +222,7 @@ async function creditReferralCommission({
 
   // unique(payment_id) makes this safe against the same payment being processed twice
   // (webhook + client verify both landing) — the second insert just violates the constraint.
-  await db.from("commissions").insert({
+  const { error: commissionError } = await db.from("commissions").insert({
     payment_id: paymentId,
     referrer_user_id: referral.referrer_user_id,
     referred_user_id: referredUserId,
@@ -208,4 +232,14 @@ async function creditReferralCommission({
     commission_amount: commissionAmount,
     commission_currency: baseCurrency,
   });
+
+  if (!commissionError) {
+    await notify({
+      db,
+      userId: referral.referrer_user_id,
+      type: "commission_earned",
+      title: "You earned a commission",
+      body: `You earned ${commissionAmount} ${baseCurrency} from a referral's payment.`,
+    });
+  }
 }
