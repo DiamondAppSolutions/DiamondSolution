@@ -1,7 +1,14 @@
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { AdminLayout } from "@/components/AdminLayout";
+import { parseCSV, downloadCSV } from "@/lib/csv";
 
 interface Course {
   id: string;
@@ -35,6 +42,8 @@ export default function AdminQuestions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [type, setType] = useState<"objective" | "application">("objective");
   const [prompt, setPrompt] = useState("");
@@ -150,6 +159,147 @@ export default function AdminQuestions() {
     await load();
   }
 
+  function downloadTemplate() {
+    const isApp = course?.default_question_type === "application";
+    const headers = isApp
+      ? ["Question", "Expected Answer"]
+      : [
+          "Question",
+          "Option A",
+          "Option B",
+          "Option C",
+          "Option D",
+          "Option E",
+          "Correct Answer (A-E or 0-4)",
+          "Explanation",
+        ];
+    const sampleRow = isApp
+      ? [
+          "Describe the key concepts of the system architecture.",
+          "Key concepts: microservices decoupling, event-driven processing.",
+        ]
+      : [
+          "Sample question?",
+          "Option 1",
+          "Option 2",
+          "Option 3",
+          "Option 4",
+          "Option 5",
+          "A",
+          "Because it is A",
+        ];
+    downloadCSV(
+      isApp
+        ? "application_question_template.csv"
+        : "question_import_template.csv",
+      [headers, sampleRow],
+    );
+  }
+
+  function handleExport() {
+    if (!course || questions.length === 0) return;
+    const isApp = course.default_question_type === "application";
+    const headers = isApp
+      ? ["Question", "Expected Answer"]
+      : [
+          "Question",
+          "Option A",
+          "Option B",
+          "Option C",
+          "Option D",
+          "Option E",
+          "Correct Answer (A-E or 0-4)",
+          "Explanation",
+        ];
+    const rows = questions.map((q) => {
+      if (isApp) return [q.prompt, q.expected_answer ?? ""];
+      const byLabel = (label: string) =>
+        q.options.find((o) => o.label === label)?.body ?? "";
+      const correct = q.options.find((o) => o.is_correct)?.label ?? "A";
+      return [
+        q.prompt,
+        byLabel("A"),
+        byLabel("B"),
+        byLabel("C"),
+        byLabel("D"),
+        byLabel("E"),
+        correct,
+        q.explanation ?? "",
+      ];
+    });
+    downloadCSV(`archive_${course.title.replace(/\s+/g, "_")}.csv`, [
+      headers,
+      ...rows,
+    ]);
+  }
+
+  // Column mapping matches the old app's export exactly (see 05-BACKEND.md's note on this
+  // being the migration path from the old question bank) — objective: question, options A-E,
+  // correct answer (letter A-E or index 0-4), explanation; application: question, expected
+  // answer (or column 7, for a file exported from the 8-column objective-style template).
+  async function handleImport(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !courseId || !course) return;
+    e.target.value = "";
+
+    const text = await file.text();
+    const rows = parseCSV(text).slice(1); // drop header
+    const isApp = course.default_question_type === "application";
+
+    setImporting(true);
+    setError(null);
+    let imported = 0;
+    let nextOrder = questions.length;
+
+    for (const row of rows) {
+      if (!row || row.length === 0) continue;
+      if (!isApp && row.length < 6) continue;
+      const questionText = (row[0] ?? "").trim();
+      if (isApp && !questionText && !(row[1] ?? "").trim()) continue;
+      if (!questionText) continue;
+
+      const { data: inserted, error: qError } = await supabase
+        .from("questions")
+        .insert({
+          course_id: courseId,
+          type: isApp ? "application" : "objective",
+          prompt: questionText,
+          expected_answer: isApp ? (row[1] || row[7] || "").trim() : null,
+          explanation: isApp ? null : (row[7] ?? "").trim() || null,
+          sort_order: nextOrder++,
+        })
+        .select("id")
+        .single();
+
+      if (qError || !inserted) continue;
+
+      if (!isApp) {
+        const rawCorrect = (row[6] ?? "").trim().toUpperCase();
+        const correctIndex = OPTION_LABELS.includes(rawCorrect)
+          ? OPTION_LABELS.indexOf(rawCorrect)
+          : Number.isInteger(Number(rawCorrect)) &&
+              Number(rawCorrect) >= 0 &&
+              Number(rawCorrect) <= 4
+            ? Number(rawCorrect)
+            : 0;
+
+        const optionRows = OPTION_LABELS.map((label, i) => ({
+          question_id: inserted.id,
+          label,
+          body: (row[i + 1] ?? "").trim() || `Option ${label}`,
+          is_correct: i === correctIndex,
+          sort_order: i,
+        }));
+        await supabase.from("question_options").insert(optionRows);
+      }
+      imported++;
+    }
+
+    setImporting(false);
+    await load();
+    alert(`${imported} question(s) imported.`);
+  }
+
   if (!course && !loading) {
     return (
       <AdminLayout>
@@ -166,6 +316,33 @@ export default function AdminQuestions() {
       <p className="mt-1 text-sm text-text-3">
         {questions.length} active question(s)
       </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button onClick={downloadTemplate} className="btn-outline text-sm">
+          Download template
+        </button>
+        <button
+          onClick={handleExport}
+          disabled={questions.length === 0}
+          className="btn-outline text-sm disabled:opacity-50"
+        >
+          Export CSV
+        </button>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importing}
+          className="btn-secondary text-sm"
+        >
+          {importing ? "Importing…" : "Import CSV"}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          onChange={(e) => void handleImport(e)}
+          className="hidden"
+        />
+      </div>
 
       <form onSubmit={handleCreate} className="card-luxury mt-6 space-y-4 p-6">
         <h2 className="font-heading text-base font-bold text-text-1">
