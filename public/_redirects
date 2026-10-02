@@ -1,0 +1,6 @@
+# Cloudflare Pages SPA fallback — react-router-dom handles routing client-side, so every
+# path (e.g. a direct load of /dashboard, /admin/login) must still serve index.html and let
+# the app's own router take over, or Cloudflare would 404 on anything but "/". Same role as
+# netlify.toml's [[redirects]] block, kept alongside it (harmless either way) since this repo
+# is moving off Netlify.
+/*    /index.html   200

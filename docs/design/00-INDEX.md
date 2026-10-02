@@ -29,8 +29,9 @@ approve before one is created.
    are built, but nothing has reached a live Supabase project yet since this has all been built
    from a sandbox that can't reach `api.supabase.com`. This is the exact, ordered list of what
    to run from a real machine: link + push the schema, set secrets, deploy Edge Functions,
-   register the Paystack webhook, configure Auth redirect URLs, set Netlify env vars, bootstrap
-   the first admin, and smoke-test a real payment before going live.
+   register the Paystack webhook, connect Cloudflare Pages, configure Auth redirect URLs, set
+   Cloudflare env vars, bootstrap the first admin, and smoke-test a real payment before going
+   live.
 
 ## Open decisions for you specifically
 

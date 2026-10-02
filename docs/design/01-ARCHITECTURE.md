@@ -72,8 +72,8 @@ Both were on the table. The reason to move, specifically:
 │   Frontend (Vite SPA)    │──────▶│        Supabase project         │
 │   React + TS + Tailwind  │        │  ┌───────────┐  ┌────────────┐ │
 │   react-router-dom       │◀──────│  │  Postgres  │  │    Auth    │ │
-│   deployed to Vercel/     │  RLS- │  │ (RLS-gated)│  │ (email+pw, │ │
-│   Netlify free tier       │ gated │  └───────────┘  │  MFA/TOTP, │ │
+│   deployed to Cloudflare  │  RLS- │  │ (RLS-gated)│  │ (email+pw, │ │
+│   Pages free tier         │ gated │  └───────────┘  │  MFA/TOTP, │ │
 └─────────────┬────────────┘ direct │  ┌───────────┐  │  passkeys) │ │
               │                queries│  │  Storage  │  └────────────┘ │
               │ privileged ops only  │  │ (images,  │  ┌────────────┐ │
@@ -133,8 +133,9 @@ The old app had to maintain **two parallel entry points for one Express app**
 `serverless-http` for Netlify) specifically because Netlify can't run a persistent Node
 process. That whole problem disappears here:
 
-- **Frontend**: a static Vite build, deployed to Vercel or Netlify's free tier as a plain
-  static site (no functions needed on that side at all).
+- **Frontend**: a static Vite build, deployed to Cloudflare Pages' free tier as a plain
+  static site (no functions needed on that side at all — moved off Netlify after its team
+  ran out of operational credits and auto-deploys stalled).
 - **Backend**: Supabase Edge Functions, deployed via the Supabase CLI (`supabase functions
   deploy`) directly to Supabase's own edge network — no second hosting target, no
   serverless-wrapping shim, no "does this time out at 10s on the free tier" surprise (Supabase

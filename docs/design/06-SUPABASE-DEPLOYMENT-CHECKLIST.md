@@ -31,7 +31,7 @@ usually `eu-west` or similar — check the lowest-latency option Supabase offers
 ```bash
 cd diamondsolution
 supabase link --project-ref <your-project-ref>
-supabase db push             # applies all 6 migrations, in order, to the live project
+supabase db push             # applies all 7 migrations, in order, to the live project
 ```
 
 This creates every table, RLS policy, and function from scratch — `profiles`, `departments`,
@@ -76,19 +76,37 @@ paying — the client-triggered `verify-payment` call and this webhook both land
 idempotent `processDepartmentAccessPayment`, so whichever arrives first wins and the second is
 a safe no-op.
 
-## 7. Configure Auth URLs
+## 7. Connect Cloudflare Pages to the repo
+
+This project moved off Netlify (its team ran out of operational credits and auto-deploys got
+stuck, separate from this repo's own code). Cloudflare Pages dashboard → **Create a project** →
+**Connect to Git** → pick `DiamondAppSolutions/DiamondSolution`, branch `main`:
+
+- **Build command**: `npm run build`
+- **Build output directory**: `dist`
+- **Root directory**: leave as the repo root (`/`)
+
+`public/_redirects` is already in the repo (`/* /index.html 200`) so client-side routing (direct
+loads of `/dashboard`, `/admin/login`, etc.) works the same way `netlify.toml`'s redirect did —
+no extra config needed for that part. `netlify.toml` itself is left in place but inert; nothing
+reads it once the project is wired to Cloudflare instead.
+
+## 8. Configure Auth URLs
 
 Dashboard → **Authentication** → **URL Configuration**:
 
-- **Site URL**: your Netlify domain, e.g. `https://diamondsolutionapp.netlify.app`
-- **Redirect URLs**: add the same domain (and any Netlify preview-deploy URL pattern you use)
+- **Site URL**: your Cloudflare Pages domain, e.g. `https://diamondsolution.pages.dev` (or your
+  custom domain once one's attached)
+- **Redirect URLs**: add the same domain (and the `*.diamondsolution.pages.dev` preview-deploy
+  pattern Cloudflare generates per branch/PR, if you want preview deploys to work too)
 
 Without this, the email-confirmation link a new user receives redirects to `localhost` instead
 of your real site.
 
-## 8. Set Netlify environment variables and redeploy
+## 9. Set Cloudflare Pages environment variables and redeploy
 
-Netlify site → **Site configuration** → **Environment variables**, set:
+Cloudflare Pages project → **Settings** → **Environment variables**, set for both Production
+and Preview:
 
 - `VITE_SUPABASE_URL` — from Supabase dashboard → Project Settings → API
 - `VITE_SUPABASE_ANON_KEY` — same page
@@ -96,12 +114,12 @@ Netlify site → **Site configuration** → **Environment variables**, set:
   key from step 4
 
 These are baked in at **build time**, not read at runtime — after setting them, trigger a new
-deploy (Netlify → Deploys → **Trigger deploy**), a page refresh alone won't pick them up. This
-is also the actual fix for the blank-page issue you saw before — that was these variables being
-unset, and `src/main.tsx` now shows a clear "Configuration missing" message instead of a blank
-screen if they're ever missing again.
+deploy (**Deployments** → **Retry deployment**, or just push a commit), a page refresh alone
+won't pick them up. This is also the actual fix for the blank-page issue you saw on the old
+Netlify setup — that was these variables being unset, and `src/main.tsx` now shows a clear
+"Configuration missing" message instead of a blank screen if they're ever missing again.
 
-## 9. Bootstrap your own admin account
+## 10. Bootstrap your own admin account
 
 1. Sign up for an account normally through the live, deployed app.
 2. Supabase dashboard → **Authentication** → **Users** → click your account → copy its **User
@@ -110,13 +128,13 @@ screen if they're ever missing again.
 4. Run it in Supabase dashboard → **SQL Editor** → New query → paste → Run.
 5. Sign out and back in on that account (role is read fresh on sign-in).
 
-## 10. Seed real content
+## 11. Seed real content
 
 Through the now-unlocked `/admin` screens: create at least one department (with
 `department_pricing`), a course, and either hand-enter questions or use the CSV import on the
 Questions tab if you have the old app's exported question bank.
 
-## 11. End-to-end smoke test (Paystack test mode)
+## 12. End-to-end smoke test (Paystack test mode)
 
 - Sign up a second (non-admin) test account.
 - Browse departments, pick one, pay with a Paystack **test card**
@@ -128,7 +146,7 @@ Questions tab if you have the old app's exported question bank.
   `commissions` row and a "You earned a commission" notification appear on the referrer's
   account once the payment succeeds.
 
-## 12. Go live with real payments
+## 13. Go live with real payments
 
 Once the test-mode run above is clean:
 
@@ -136,11 +154,11 @@ Once the test-mode run above is clean:
 supabase secrets set PAYSTACK_SECRET_KEY=sk_live_xxxxxxxxxxxx
 ```
 
-Update `VITE_PAYSTACK_PUBLIC_KEY` in Netlify to the matching `pk_live_...` key, redeploy, and
-update the Paystack webhook URL registration if Paystack treats test/live as separate webhook
-configs (check the Paystack dashboard — it usually doesn't, but worth a glance). Do one real,
-low-value transaction yourself post-deploy to confirm the live keys work end-to-end before
-telling anyone else the platform is open.
+Update `VITE_PAYSTACK_PUBLIC_KEY` in Cloudflare Pages to the matching `pk_live_...` key,
+redeploy, and update the Paystack webhook URL registration if Paystack treats test/live as
+separate webhook configs (check the Paystack dashboard — it usually doesn't, but worth a
+glance). Do one real, low-value transaction yourself post-deploy to confirm the live keys work
+end-to-end before telling anyone else the platform is open.
 
 ---
 
