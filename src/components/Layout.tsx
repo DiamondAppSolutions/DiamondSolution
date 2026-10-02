@@ -1,5 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { ChevronLeft, Home, BookOpen, Shield, LogOut } from "lucide-react";
+import {
+  ChevronLeft,
+  Home,
+  BookOpen,
+  MessageCircle,
+  User,
+  Shield,
+  LogOut,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
 
@@ -11,7 +19,9 @@ interface LayoutProps {
 
 const NAV = [
   { to: "/dashboard", label: "Home", icon: Home },
-  { to: "/courses", label: "Courses", icon: BookOpen },
+  { to: "/courses", label: "Departments", icon: BookOpen },
+  { to: "/chats", label: "Chats", icon: MessageCircle },
+  { to: "/profile", label: "User", icon: User },
 ];
 
 export function Layout({ title, onBack, children }: LayoutProps) {
@@ -48,20 +58,20 @@ export function Layout({ title, onBack, children }: LayoutProps) {
 
       <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
 
-      <nav className="fixed bottom-4 left-1/2 flex -translate-x-1/2 gap-1 rounded-2xl border border-canvas-border bg-navy px-2 py-2 shadow-lg">
+      <nav className="fixed bottom-4 left-1/2 flex -translate-x-1/2 gap-0.5 rounded-2xl border border-canvas-border bg-navy px-1.5 py-2 shadow-lg">
         {NAV.map(({ to, label, icon: Icon }) => {
           const active = location.pathname.startsWith(to);
           return (
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-4 py-1.5 text-xs font-semibold transition-colors ${
+              className={`flex flex-col items-center gap-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
                 active
                   ? "bg-white/15 text-white"
                   : "text-slate-400 hover:text-white"
               }`}
             >
-              <Icon size={18} />
+              <Icon size={17} />
               {label}
             </Link>
           );
@@ -69,13 +79,13 @@ export function Layout({ title, onBack, children }: LayoutProps) {
         {isAdmin && (
           <Link
             to="/admin/departments"
-            className={`flex flex-col items-center gap-0.5 rounded-xl px-4 py-1.5 text-xs font-semibold transition-colors ${
+            className={`flex flex-col items-center gap-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
               location.pathname.startsWith("/admin")
                 ? "bg-white/15 text-white"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <Shield size={18} />
+            <Shield size={17} />
             Admin
           </Link>
         )}
