@@ -16,6 +16,7 @@ import AdminCourses from "@/pages/admin/AdminCourses";
 import AdminQuestions from "@/pages/admin/AdminQuestions";
 import AdminPayments from "@/pages/admin/AdminPayments";
 import AdminWithdrawals from "@/pages/admin/AdminWithdrawals";
+import AdminAuditLog from "@/pages/admin/AdminAuditLog";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           />
           <Route path="/admin/payments" element={<AdminPayments />} />
           <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
+          <Route path="/admin/audit-log" element={<AdminAuditLog />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

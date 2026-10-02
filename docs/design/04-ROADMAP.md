@@ -55,15 +55,30 @@ top of it.
 
 ## Phase 4 — Notifications, chat, admin back office
 
-- [ ] `notifications`, `chat_threads`, `chat_messages` (+ Realtime subscription for live chat
-      and unread badges — the one place Realtime is actually used).
-- [ ] WhatsApp admin-notify Edge Function (best-effort, same pattern as before).
-- [ ] The full tabbed admin back office — rebuilt as several focused screens/components
-      instead of one ~5,000-line file, since that was itself an old-app maintenance problem
-      worth not repeating. Each tab's data-loading pattern (one-time fetch + manual refresh for
-      large/volatile tables, live subscription only for small/bounded ones) is decided per
-      table up front, matching the lesson the old app learned the hard way.
-- [ ] Admin security-clearance (step-up OTP) flow — one shared implementation, used everywhere.
+- [x] `notifications` (in-app only — bell icon + unread badge, auto-created on payment
+      success/failure, commission earned, and withdrawal outcomes). No Realtime subscription
+      used for this; a fetch-on-open dropdown was enough for a bounded, per-user list.
+- [ ] `chat_threads`, `chat_messages` (+ Realtime subscription for live chat and unread
+      badges — the one place Realtime would actually be used). Deferred on purpose — the old
+      app's bottom nav had a "Chats" tab the new one doesn't yet, and this is that gap.
+- [ ] WhatsApp admin-notify Edge Function (best-effort, same pattern as before). Deferred
+      together with chat — in the old app this function only exists to relay a chat message to
+      the admin's WhatsApp, so it has nothing to do until chat itself is built.
+- [x] The tabbed admin back office — built as several focused screens instead of one
+      ~5,000-line file (Departments, Courses, Questions, Transactions, Withdrawals, Audit Log),
+      each a separate component with its own one-time-fetch-on-mount data loading. No
+      Realtime/live-subscription tab exists yet since nothing built so far needs one.
+- [x] `admin_actions_log` (the audit-trail half) — every withdrawal-affecting admin action
+      (approve/reject/pay-via-Paystack/mark-paid-manually) writes a row; viewable at
+      `/admin/audit-log`.
+- [ ] Admin security-clearance (step-up OTP) flow — one shared implementation, used
+      everywhere. **Blocked on a decision, not forgotten**: `request-otp` needs a real
+      email-delivery path (Resend, SendGrid, Supabase's own default SMTP, or a provider
+      already in use elsewhere) that hasn't been chosen yet. Building it against no
+      configured provider would ship code nobody could actually test or receive an email
+      from, so this stays undone until that choice is made — see
+      `06-SUPABASE-DEPLOYMENT-CHECKLIST.md` for where this fits in the go-live sequence once
+      decided.
 
 ## Phase 5 — Device/session policy, MFA, hardening
 

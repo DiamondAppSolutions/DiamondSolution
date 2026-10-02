@@ -16,6 +16,22 @@ import {
 } from "../_shared/paystack.ts";
 import { notify } from "../_shared/notify.ts";
 
+async function logAction(
+  db: ReturnType<typeof serviceClient>,
+  actorId: string,
+  action: string,
+  withdrawalId: string,
+  reason?: string,
+) {
+  await db.from("admin_actions_log").insert({
+    actor_user_id: actorId,
+    action,
+    target_table: "withdrawals",
+    target_id: withdrawalId,
+    reason,
+  });
+}
+
 Deno.serve(async (req) => {
   const preflight = handleOptions(req);
   if (preflight) return preflight;
@@ -73,6 +89,13 @@ Deno.serve(async (req) => {
         title: "Withdrawal rejected",
         body: `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} was rejected${reason ? `: ${reason}` : "."}`,
       });
+      await logAction(
+        db,
+        admin.id,
+        "withdrawal_rejected",
+        withdrawal_id,
+        reason,
+      );
       return jsonResponse({ success: true, status: "failed" });
     }
 
@@ -121,6 +144,13 @@ Deno.serve(async (req) => {
         title: "Withdrawal failed",
         body: `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} failed: ${recipient.message}`,
       });
+      await logAction(
+        db,
+        admin.id,
+        "withdrawal_payout_failed",
+        withdrawal_id,
+        `recipient creation: ${recipient.message}`,
+      );
       throw new HttpError(
         502,
         `Paystack recipient creation failed: ${recipient.message}`,
@@ -154,6 +184,14 @@ Deno.serve(async (req) => {
         ? `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} was paid out.`
         : `Your withdrawal of ${withdrawal.amount} ${withdrawal.currency} failed: ${transfer.message}`,
     });
+
+    await logAction(
+      db,
+      admin.id,
+      paid ? "withdrawal_paid_via_paystack" : "withdrawal_payout_failed",
+      withdrawal_id,
+      paid ? undefined : transfer.message,
+    );
 
     if (!paid)
       throw new HttpError(502, `Paystack transfer failed: ${transfer.message}`);
